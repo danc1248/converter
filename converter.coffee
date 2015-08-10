@@ -143,14 +143,13 @@ custom = (row, isColumns = false)->
 
 exports.execute = (custumFn = custom, queryFn = getInsert)->
   readFile options.file, (error, data)->
-    columns = null
     colLength = 0
     colFixed = null
 
     for row, index in data
       # assume firt row is the column names:
       if index is 0
-        columns = row
+        columns = row.map (elem)->return elem.replace(/"/g, "").trim()
         colLength = columns.length
         colFixed = filterFields(custom(addExtras(columns, true), true), colLength)
 
