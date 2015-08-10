@@ -151,11 +151,11 @@ exports.execute = (custumFn = custom, queryFn = getInsert)->
       if index is 0
         columns = row.map (elem)->return elem.replace(/"/g, "").trim()
         colLength = columns.length
-        colFixed = filterFields(custom(addExtras(columns, true), true), colLength)
+        colFixed = filterFields(custumFn(addExtras(columns, true), true), colLength)
 
       else if row.length > 1 and row.length is colLength
-        rowFixed = filterFields(custom(addExtras(row)), colLength)
-        query = getInsert(colFixed, rowFixed)
+        rowFixed = filterFields(custumFn(addExtras(row)), colLength)
+        query = queryFn(colFixed, rowFixed)
 
         if query
           console.log query
