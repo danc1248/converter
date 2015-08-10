@@ -1,0 +1,19 @@
+{
+  "name": "converter",
+  "version": "0.0.0",
+  "description": "for reading excel files and outputting mysql inserts or whatever",
+  "main": "converter.coffee",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/danc1248/converter.git"
+  },
+  "author": "danc1248",
+  "license": "off limits",
+  "bugs": {
+    "url": "https://github.com/danc1248/converter/issues"
+  },
+  "dependencies": {
+    "node-xlsx": "~0.6.0",
+    "cli": "git://github.com/danc1248/cli"
+  }
+}
