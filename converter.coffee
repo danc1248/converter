@@ -55,6 +55,7 @@ multiple worksheets.
   columns: [Array] indexes of desired columns, if not all
   extras: [Object] json of {col: data} for extra data to include
 
+
 Usage:
   coffee convert.coffee --file SSAT_VR_Percentiles.xlsx --table \
     percentiles --worksheet 1 --insert --columns 1,2 1>temp.sql
@@ -106,8 +107,24 @@ readFile = (file, callback)->
 # @return array of rows with array of columns
 convert = (data)->
   rows = data.split("\n").map (row)->
-    return row.split(",").map (elem)->
-      return elem.trim()
+    output = []
+    while row.length > 0
+      if row[0] is "\""
+        regexp = /[^\\]"(,|$)/
+        adjust = 2
+      else
+        regexp = /(,|$)/
+        adjust = 0
+
+      index = row.search(regexp)
+      if index is -1
+        console.error "wtf regxp not found", regexp
+      else
+        elem = row.substring 0, (index+adjust)
+        output.push elem
+        row = row.substring(index + adjust + 1)
+        #console.log "found", regexp, elem, row, row.length
+    return output
   return rows
 
 # options can specify to only include some of the columns from the dataset, by index
@@ -149,7 +166,7 @@ exports.execute = (custumFn = custom, queryFn = getInsert)->
     for row, index in data
       # assume firt row is the column names:
       if index is 0
-        columns = row.map (elem)->return elem.replace(/"/g, "").trim()
+        columns = row.map (elem)->return "#{elem}".replace(/"/g, "").trim()
         colLength = columns.length
         colFixed = filterFields(custumFn(addExtras(columns, true), true), colLength)
 
