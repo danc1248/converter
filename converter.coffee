@@ -38,6 +38,8 @@ options = require("cli").execute {
   extras: [Object],
   h: [Boolean],
   help: [Boolean]
+  insert: [Boolean]
+  update: [Boolean]
 }
 
 if options.h or options.help
