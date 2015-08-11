@@ -120,7 +120,12 @@ safeC = null
 getInsert = (columns, row)->
   if not safeC
     safeC = columns.map((elem)-> return "#{elem}").join()
-  safeR = row.map((elem)-> return "\"#{elem}\"").join()
+  safeR = row.map (elem)->
+    safe = "#{elem}"
+    safe = safe.replace(/"/g, '\\"')
+    safe = "\"#{safe}\""
+    return safe
+  .join()
   return "INSERT INTO #{options.table} (#{safeC}) VALUES (#{safeR});"
 
 # options can stuff in extra static data that was not included in the file:

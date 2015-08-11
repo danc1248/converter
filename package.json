@@ -1,6 +1,6 @@
 {
   "name": "converter",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "for reading excel files and outputting mysql inserts or whatever",
   "main": "converter.coffee",
   "repository": {
