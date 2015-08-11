@@ -25,6 +25,7 @@
 # what the shit!
 
 xlsx = require "node-xlsx"
+csv_parser = require "csv-parse"
 
 util = require "util"
 fs = require "fs"
@@ -63,8 +64,6 @@ Usage:
 """
   process.exit(0)
 
-console.log "/*\n#{process.argv.join(" ")}\n*/"
-
 # these fields we are going to stuff into whatever is already in the csv
 # we convert it to an array for easy concat
 extraFields = []
@@ -92,7 +91,12 @@ readFile = (file, callback)->
       if error
         console.error error
       else
-        callback null, convert(data)
+        # http://csv.adaltas.com/parse/
+        # this couldn't handle escaped quotes inside a field
+        csv_parser data, {
+            skip_empty_lines: true
+            trim: true
+          }, callback
 
   # attempt to use xlsx, note the huge bug mentioned above...
   else
@@ -101,31 +105,6 @@ readFile = (file, callback)->
       callback null, obj[options.worksheet].data
     else
       console.error "please specify a worksheet by Number"
-
-# parse a csv text file into rows and columns:
-# @param String
-# @return array of rows with array of columns
-convert = (data)->
-  rows = data.split("\n").map (row)->
-    output = []
-    while row.length > 0
-      if row[0] is "\""
-        regexp = /[^\\]"(,|$)/
-        adjust = 2
-      else
-        regexp = /(,|$)/
-        adjust = 0
-
-      index = row.search(regexp)
-      if index is -1
-        console.error "wtf regxp not found", regexp
-      else
-        elem = row.substring 0, (index+adjust)
-        output.push elem
-        row = row.substring(index + adjust + 1)
-        #console.log "found", regexp, elem, row, row.length
-    return output
-  return rows
 
 # options can specify to only include some of the columns from the dataset, by index
 filterFields = (row, originalLength)->
@@ -160,27 +139,33 @@ custom = (row, isColumns = false)->
 
 exports.execute = (custumFn = custom, queryFn = getInsert)->
   readFile options.file, (error, data)->
-    colLength = 0
-    colFixed = null
+    if error
+      console.error "error in converter:", error
+      process.exit(1)
+    else
+      console.log "/*\n#{process.argv.join(" ")}\n*/"
 
-    for row, index in data
-      # assume firt row is the column names:
-      if index is 0
-        columns = row.map (elem)->return "#{elem}".replace(/"/g, "").trim()
-        colLength = columns.length
-        colFixed = filterFields(custumFn(addExtras(columns, true), true), colLength)
+      colLength = 0
+      colFixed = null
 
-      else if row.length > 1 and row.length is colLength
-        rowFixed = filterFields(custumFn(addExtras(row)), colLength)
-        query = queryFn(colFixed, rowFixed)
+      for row, index in data
+        # assume firt row is the column names:
+        if index is 0
+          columns = row.map (elem)->return "#{elem}".replace(/"/g, "").trim()
+          colLength = columns.length
+          colFixed = filterFields(custumFn(addExtras(columns, true), true), colLength)
 
-        if query
-          console.log query
+        else if row.length > 1 and row.length is colLength
+          rowFixed = filterFields(custumFn(addExtras(row)), colLength)
+          query = queryFn(colFixed, rowFixed)
 
-      else
-        console.error "suspicious row count at row: #{index}", row
+          if query
+            console.log query
 
-    process.exit(0)
+        else
+          console.error "suspicious row count at row: #{index}", row
+
+      process.exit(0)
 
   return
 

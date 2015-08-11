@@ -1,6 +1,6 @@
 {
   "name": "converter",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "for reading excel files and outputting mysql inserts or whatever",
   "main": "converter.coffee",
   "repository": {
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "node-xlsx": "~0.6.0",
-    "cli": "git://github.com/danc1248/cli"
+    "cli": "git://github.com/danc1248/cli",
+    "csv-parse": "~1.0.0"
   }
 }
